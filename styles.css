@@ -46,7 +46,7 @@ select {
 
 .recipe-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
   gap: 16px;
 }
 
@@ -54,12 +54,26 @@ select {
   padding: 16px;
   border: 1px solid #dbe3dc;
   border-radius: 12px;
+  background: #fff;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.recipe-card > h3 {
+  margin: 0 0 4px;
+}
+
+.recipe-card > p {
+  margin: 4px 0;
+  font-size: 0.95em;
 }
 
 .recipe-card button {
   margin-right: 8px;
   margin-top: 8px;
   cursor: pointer;
+  padding: 8px 10px;
 }
 
 .error { color: #a32626; }
@@ -88,4 +102,95 @@ select {
 
 #cancel-edit[hidden] {
   display: none;
+}
+
+.reviews {
+  margin-top: 14px;
+  padding-top: 12px;
+  border-top: 1px solid #e3e9e4;
+}
+
+.reviews h4 {
+  margin: 0 0 8px;
+  font-size: 1em;
+}
+
+.reviews-empty {
+  color: #6c7a72;
+  font-size: 0.9em;
+  margin: 6px 0;
+}
+
+.review-list {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 10px;
+}
+
+.review-item {
+  padding: 8px 0;
+  border-bottom: 1px dashed #e3e9e4;
+}
+
+.review-item:last-child {
+  border-bottom: none;
+}
+
+.review-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.review-stars {
+  color: #d4a017;
+  letter-spacing: 1px;
+}
+
+.review-like {
+  background: none;
+  border: none;
+  padding: 0 6px;
+  margin: 0 0 0 auto;
+  font-size: 1.2em;
+  line-height: 1;
+  cursor: pointer;
+  color: #8a8a8a;
+}
+
+.review-like.liked {
+  color: #d23669;
+}
+
+.review-text {
+  margin: 4px 0 0;
+  font-size: 0.95em;
+  word-break: break-word;
+}
+
+.review-form {
+  display: grid;
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.review-form input,
+.review-form textarea,
+.review-form select {
+  width: 100%;
+  padding: 6px 8px;
+  margin-top: 0;
+}
+
+.review-form textarea {
+  min-height: 60px;
+  resize: vertical;
+}
+
+.review-form button {
+  justify-self: start;
+  margin-top: 0;
+  padding: 8px 12px;
+  cursor: pointer;
 }

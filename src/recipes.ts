@@ -11,7 +11,8 @@ export function createRecipe(draft: RecipeDraft): Recipe {
   return {
     ...draft,
     id: crypto.randomUUID(),
-    favorite: false
+    favorite: false,
+    reviews: []
   };
 }
 

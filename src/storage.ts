@@ -1,6 +1,19 @@
-import type { Recipe } from "./types.js";
+import type { Recipe, Review } from "./types.js";
 
 const STORAGE_KEY = "culinary-recipes";
+
+function isReview(value: unknown): value is Review {
+  if (typeof value !== "object" || value === null) return false;
+  const item = value as Record<string, unknown>;
+  return (
+    typeof item.id === "string" &&
+    typeof item.author === "string" &&
+    typeof item.text === "string" &&
+    typeof item.rating === "number" &&
+    typeof item.liked === "boolean" &&
+    typeof item.createdAt === "string"
+  );
+}
 
 function isRecipe(value: unknown): value is Recipe {
   if (typeof value !== "object" || value === null) return false;
@@ -9,6 +22,8 @@ function isRecipe(value: unknown): value is Recipe {
 
   const imageOk =
     item.imageUrl === undefined || typeof item.imageUrl === "string";
+  const reviewsOk =
+    Array.isArray(item.reviews) && item.reviews.every(isReview);
 
   return (
     typeof item.id === "string" &&
@@ -20,7 +35,8 @@ function isRecipe(value: unknown): value is Recipe {
     item.ingredients.every((x: unknown) => typeof x === "string") &&
     typeof item.instructions === "string" &&
     typeof item.favorite === "boolean" &&
-    imageOk
+    imageOk &&
+    reviewsOk
   );
 }
 

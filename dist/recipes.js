@@ -1,9 +1,26 @@
+export const ALL_CATEGORIES = ["Завтрак", "Обед", "Ужин", "Десерт"];
 export function createRecipe(draft) {
     return {
         ...draft,
         id: crypto.randomUUID(),
-        favorite: false
+        favorite: false,
+        reviews: []
     };
+}
+export function updateRecipe(recipes, id, patch) {
+    return recipes.map((recipe) => {
+        if (recipe.id !== id)
+            return recipe;
+        const { imageUrl, ...rest } = patch;
+        const base = { ...recipe, ...rest };
+        if (imageUrl === undefined || imageUrl === "") {
+            delete base.imageUrl;
+        }
+        else {
+            base.imageUrl = imageUrl;
+        }
+        return base;
+    });
 }
 export function toggleFavorite(recipes, id) {
     return recipes.map((recipe) => recipe.id === id ? { ...recipe, favorite: !recipe.favorite } : recipe);
@@ -13,10 +30,27 @@ export function deleteRecipe(recipes, id) {
 }
 export function filterRecipes(recipes, filter) {
     const query = filter.query.trim().toLowerCase();
-    return recipes.filter((recipe) => {
+    const filtered = recipes.filter((recipe) => {
         const matchesQuery = query === "" || recipe.title.toLowerCase().includes(query);
         const matchesCategory = filter.category === "Все" || recipe.category === filter.category;
         const matchesFavorites = !filter.favoritesOnly || recipe.favorite;
-        return matchesQuery && matchesCategory && matchesFavorites;
+        const matchesQuick = !filter.quickOnly || recipe.cookingTime <= 30;
+        return matchesQuery && matchesCategory && matchesFavorites && matchesQuick;
     });
+    switch (filter.sortBy) {
+        case "time-asc":
+            return [...filtered].sort((a, b) => a.cookingTime - b.cookingTime);
+        case "time-desc":
+            return [...filtered].sort((a, b) => b.cookingTime - a.cookingTime);
+        case "title-asc":
+            return [...filtered].sort((a, b) => a.title.localeCompare(b.title, "ru"));
+        default:
+            return filtered;
+    }
+}
+export function getCategoryStats(recipes) {
+    return ALL_CATEGORIES.map((category) => ({
+        category,
+        count: recipes.filter((r) => r.category === category).length
+    }));
 }

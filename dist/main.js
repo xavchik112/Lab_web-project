@@ -1,17 +1,27 @@
 import { initialRecipes } from "./data.js";
 import { loadRecipes, saveRecipes } from "./storage.js";
-import { createRecipe, deleteRecipe, filterRecipes, toggleFavorite } from "./recipes.js";
-import { searchInput, categoryFilter, favoritesOnly, recipeForm, recipeList, formMessage, renderRecipes } from "./ui.js";
+import { createRecipe, deleteRecipe, filterRecipes, getCategoryStats, toggleFavorite, updateRecipe } from "./recipes.js";
+import { addReview, toggleReviewLike } from "./reviews.js";
+import { searchInput, categoryFilter, favoritesOnly, quickOnly, sortBy, resetFilters, categoryStats, recipeForm, recipeList, formMessage, renderRecipes, idInput, titleInput, categoryInput, servingsInput, timeInput, ingredientsInput, instructionsInput, imageInput, isValidImageUrl, fillFormForEdit, resetFormToCreate, cancelEditButton } from "./ui.js";
 let recipes = loadRecipes() ?? initialRecipes;
 function getFilter() {
     return {
         query: searchInput.value,
         category: categoryFilter.value,
-        favoritesOnly: favoritesOnly.checked
+        favoritesOnly: favoritesOnly.checked,
+        quickOnly: quickOnly.checked,
+        sortBy: sortBy.value
     };
+}
+function renderStats() {
+    const stats = getCategoryStats(recipes);
+    categoryStats.textContent =
+        "Всего по категориям: " +
+            stats.map((s) => `${s.category} — ${s.count}`).join(", ");
 }
 function render() {
     renderRecipes(filterRecipes(recipes, getFilter()));
+    renderStats();
 }
 function persistAndRender() {
     saveRecipes(recipes);
@@ -20,6 +30,16 @@ function persistAndRender() {
 searchInput.addEventListener("input", render);
 categoryFilter.addEventListener("change", render);
 favoritesOnly.addEventListener("change", render);
+quickOnly.addEventListener("change", render);
+sortBy.addEventListener("change", render);
+resetFilters.addEventListener("click", () => {
+    searchInput.value = "";
+    categoryFilter.value = "Все";
+    favoritesOnly.checked = false;
+    quickOnly.checked = false;
+    sortBy.value = "default";
+    render();
+});
 recipeList.addEventListener("click", (event) => {
     const target = event.target;
     if (!(target instanceof HTMLElement))
@@ -33,29 +53,62 @@ recipeList.addEventListener("click", (event) => {
         return;
     if (action === "favorite") {
         recipes = toggleFavorite(recipes, id);
+        persistAndRender();
     }
     else if (action === "delete") {
+        const recipe = recipes.find((r) => r.id === id);
+        const name = recipe ? `«${recipe.title}»` : "рецепт";
+        if (!window.confirm(`Удалить ${name}? Действие необратимо.`))
+            return;
         recipes = deleteRecipe(recipes, id);
+        if (idInput.value === id) {
+            resetFormToCreate();
+            formMessage.textContent = "";
+            formMessage.className = "";
+        }
+        persistAndRender();
     }
-    else {
+    else if (action === "edit") {
+        const recipe = recipes.find((r) => r.id === id);
+        if (recipe)
+            fillFormForEdit(recipe);
+    }
+    else if (action === "review-like") {
+        const reviewId = button.dataset.reviewId;
+        if (!reviewId)
+            return;
+        recipes = toggleReviewLike(recipes, id, reviewId);
+        persistAndRender();
+    }
+});
+recipeList.addEventListener("submit", (event) => {
+    const form = event.target;
+    if (!(form instanceof HTMLFormElement))
+        return;
+    if (!form.classList.contains("review-form"))
+        return;
+    event.preventDefault();
+    const recipeId = form.dataset.recipeId;
+    if (!recipeId)
+        return;
+    const data = new FormData(form);
+    const author = String(data.get("author") ?? "").trim();
+    const text = String(data.get("text") ?? "").trim();
+    const rating = Number(data.get("rating"));
+    if (!author || !text) {
+        window.alert("Заполните имя и текст отзыва.");
         return;
     }
+    if (!Number.isFinite(rating) || rating < 1 || rating > 5) {
+        window.alert("Оценка должна быть от 1 до 5.");
+        return;
+    }
+    const draft = { author, text, rating };
+    recipes = addReview(recipes, recipeId, draft);
     persistAndRender();
 });
 recipeForm.addEventListener("submit", (event) => {
     event.preventDefault();
-    const titleInput = document.querySelector("#recipe-title");
-    const categoryInput = document.querySelector("#recipe-category");
-    const servingsInput = document.querySelector("#recipe-servings");
-    const timeInput = document.querySelector("#recipe-time");
-    const ingredientsInput = document.querySelector("#recipe-ingredients");
-    const instructionsInput = document.querySelector("#recipe-instructions");
-    if (!titleInput || !categoryInput || !servingsInput || !timeInput ||
-        !ingredientsInput || !instructionsInput) {
-        formMessage.textContent = "Ошибка разметки формы.";
-        formMessage.className = "error";
-        return;
-    }
     const title = titleInput.value.trim();
     const servings = Number(servingsInput.value);
     const cookingTime = Number(timeInput.value);
@@ -64,6 +117,7 @@ recipeForm.addEventListener("submit", (event) => {
         .map((item) => item.trim())
         .filter(Boolean);
     const instructions = instructionsInput.value.trim();
+    const imageUrl = imageInput.value.trim();
     if (!title || !instructions || ingredients.length === 0) {
         formMessage.textContent = "Заполните все поля формы.";
         formMessage.className = "error";
@@ -79,18 +133,37 @@ recipeForm.addEventListener("submit", (event) => {
         formMessage.className = "error";
         return;
     }
+    if (imageUrl && !isValidImageUrl(imageUrl)) {
+        formMessage.textContent =
+            "Ссылка на изображение должна начинаться с http:// или https://";
+        formMessage.className = "error";
+        return;
+    }
     const draft = {
         title,
         category: categoryInput.value,
         servings,
         cookingTime,
         ingredients,
-        instructions
+        instructions,
+        imageUrl: imageUrl || undefined
     };
-    recipes = [createRecipe(draft), ...recipes];
-    recipeForm.reset();
-    formMessage.textContent = "Рецепт добавлен.";
+    const editingId = idInput.value;
+    if (editingId) {
+        recipes = updateRecipe(recipes, editingId, draft);
+        formMessage.textContent = "Изменения сохранены.";
+    }
+    else {
+        recipes = [createRecipe(draft), ...recipes];
+        formMessage.textContent = "Рецепт добавлен.";
+    }
     formMessage.className = "success";
+    resetFormToCreate();
     persistAndRender();
+});
+cancelEditButton.addEventListener("click", () => {
+    resetFormToCreate();
+    formMessage.textContent = "";
+    formMessage.className = "";
 });
 render();

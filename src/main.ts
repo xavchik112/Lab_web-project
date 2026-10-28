@@ -3,6 +3,7 @@ import type {
   Recipe,
   RecipeDraft,
   RecipeFilter,
+  ReviewDraft,
   SortMode
 } from "./types.js";
 import { initialRecipes } from "./data.js";
@@ -15,6 +16,7 @@ import {
   toggleFavorite,
   updateRecipe
 } from "./recipes.js";
+import { addReview, toggleReviewLike } from "./reviews.js";
 import {
   searchInput,
   categoryFilter,
@@ -113,7 +115,42 @@ recipeList.addEventListener("click", (event: MouseEvent) => {
   } else if (action === "edit") {
     const recipe = recipes.find((r) => r.id === id);
     if (recipe) fillFormForEdit(recipe);
+  } else if (action === "review-like") {
+    const reviewId = button.dataset.reviewId;
+    if (!reviewId) return;
+    recipes = toggleReviewLike(recipes, id, reviewId);
+    persistAndRender();
   }
+});
+
+recipeList.addEventListener("submit", (event: SubmitEvent) => {
+  const form = event.target;
+  if (!(form instanceof HTMLFormElement)) return;
+  if (!form.classList.contains("review-form")) return;
+
+  event.preventDefault();
+
+  const recipeId = form.dataset.recipeId;
+  if (!recipeId) return;
+
+  const data = new FormData(form);
+  const author = String(data.get("author") ?? "").trim();
+  const text = String(data.get("text") ?? "").trim();
+  const rating = Number(data.get("rating"));
+
+  if (!author || !text) {
+    window.alert("Заполните имя и текст отзыва.");
+    return;
+  }
+
+  if (!Number.isFinite(rating) || rating < 1 || rating > 5) {
+    window.alert("Оценка должна быть от 1 до 5.");
+    return;
+  }
+
+  const draft: ReviewDraft = { author, text, rating };
+  recipes = addReview(recipes, recipeId, draft);
+  persistAndRender();
 });
 
 recipeForm.addEventListener("submit", (event: SubmitEvent) => {

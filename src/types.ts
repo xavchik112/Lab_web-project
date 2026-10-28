@@ -1,5 +1,14 @@
 export type Category = "Завтрак" | "Обед" | "Ужин" | "Десерт";
 
+export interface Review {
+  readonly id: string;
+  author: string;
+  text: string;
+  rating: number;
+  liked: boolean;
+  createdAt: string;
+}
+
 export interface Recipe {
   readonly id: string;
   title: string;
@@ -10,9 +19,12 @@ export interface Recipe {
   instructions: string;
   favorite: boolean;
   imageUrl?: string;
+  reviews: Review[];
 }
 
-export type RecipeDraft = Omit<Recipe, "id" | "favorite">;
+export type RecipeDraft = Omit<Recipe, "id" | "favorite" | "reviews">;
+
+export type ReviewDraft = Omit<Review, "id" | "liked" | "createdAt">;
 
 export type SortMode = "default" | "time-asc" | "time-desc" | "title-asc";
 

@@ -7,7 +7,17 @@ export const initialRecipes = [
         cookingTime: 20,
         ingredients: ["творог", "яйцо", "мука", "сахар"],
         instructions: "Смешать ингредиенты, сформировать сырники и обжарить.",
-        favorite: true
+        favorite: true,
+        reviews: [
+            {
+                id: "review-1",
+                author: "Анна",
+                text: "Очень нежные, дети оценили.",
+                rating: 5,
+                liked: false,
+                createdAt: "2024-05-01T10:00:00.000Z"
+            }
+        ]
     },
     {
         id: "recipe-2",
@@ -17,7 +27,8 @@ export const initialRecipes = [
         cookingTime: 35,
         ingredients: ["картофель", "морковь", "лук", "вода"],
         instructions: "Нарезать овощи и варить до готовности.",
-        favorite: false
+        favorite: false,
+        reviews: []
     },
     {
         id: "recipe-3",
@@ -27,6 +38,16 @@ export const initialRecipes = [
         cookingTime: 25,
         ingredients: ["яблоки", "корица", "мёд"],
         instructions: "Нарезать яблоки, добавить корицу и запечь.",
-        favorite: false
+        favorite: false,
+        reviews: [
+            {
+                id: "review-2",
+                author: "Игорь",
+                text: "Быстро и вкусно, добавил изюм.",
+                rating: 4,
+                liked: true,
+                createdAt: "2024-05-02T12:30:00.000Z"
+            }
+        ]
     }
 ];
