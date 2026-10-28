@@ -1,0 +1,97 @@
+<!doctype html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Кулинарная книга</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script type="module" src="./dist/main.js"></script>
+</head>
+<body>
+  <header class="page-header">
+    <h1>Кулинарная книга</h1>
+    <p>Рецепты на каждый день</p>
+  </header>
+
+  <main>
+    <section aria-labelledby="search-title">
+      <h2 id="search-title">Найти рецепт</h2>
+      <label for="search">Название</label>
+      <input id="search" type="search" placeholder="Например, сырники">
+
+      <label for="category-filter">Категория</label>
+      <select id="category-filter">
+        <option value="Все">Все категории</option>
+        <option value="Завтрак">Завтрак</option>
+        <option value="Обед">Обед</option>
+        <option value="Ужин">Ужин</option>
+        <option value="Десерт">Десерт</option>
+      </select>
+
+      <label for="sort-by">Сортировка</label>
+      <select id="sort-by">
+        <option value="default">По умолчанию</option>
+        <option value="time-asc">Время: по возрастанию</option>
+        <option value="time-desc">Время: по убыванию</option>
+        <option value="title-asc">Название: А–Я</option>
+      </select>
+
+      <label>
+        <input id="favorites-only" type="checkbox">
+        Только избранное
+      </label>
+
+      <label>
+        <input id="quick-only" type="checkbox">
+        До 30 минут
+      </label>
+
+      <button id="reset-filters" type="button">Очистить фильтры</button>
+      <p id="category-stats" aria-live="polite"></p>
+    </section>
+
+    <section aria-labelledby="add-title">
+      <h2 id="add-title">Добавить рецепт</h2>
+      <form id="recipe-form">
+        <input id="recipe-id" type="hidden">
+
+        <label for="recipe-title">Название</label>
+        <input id="recipe-title" name="title" required maxlength="80">
+
+        <label for="recipe-category">Категория</label>
+        <select id="recipe-category" name="category" required>
+          <option value="Завтрак">Завтрак</option>
+          <option value="Обед">Обед</option>
+          <option value="Ужин">Ужин</option>
+          <option value="Десерт">Десерт</option>
+        </select>
+
+        <label for="recipe-servings">Количество порций</label>
+        <input id="recipe-servings" name="servings" type="number" min="1" max="30" value="2" required>
+
+        <label for="recipe-time">Время приготовления (мин.)</label>
+        <input id="recipe-time" name="cookingTime" type="number" min="1" max="600" value="20" required>
+
+        <label for="recipe-ingredients">Ингредиенты через запятую</label>
+        <textarea id="recipe-ingredients" name="ingredients" required></textarea>
+
+        <label for="recipe-instructions">Приготовление</label>
+        <textarea id="recipe-instructions" name="instructions" required></textarea>
+
+        <label for="recipe-image">Ссылка на изображение (необязательно)</label>
+        <input id="recipe-image" name="imageUrl" type="url" placeholder="https://example.com/photo.jpg">
+
+        <button type="submit" id="submit-button">Сохранить рецепт</button>
+        <button type="button" id="cancel-edit" hidden>Отмена</button>
+        <p id="form-message" role="status"></p>
+      </form>
+    </section>
+
+    <section aria-labelledby="recipes-title">
+      <h2 id="recipes-title">Рецепты</h2>
+      <p id="results-count" aria-live="polite"></p>
+      <div id="recipe-list" class="recipe-grid"></div>
+    </section>
+  </main>
+</body>
+</html>
